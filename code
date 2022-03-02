@@ -1,0 +1,123 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Feb 24 15:52:33 2022
+
+@author: ANejikar164975
+"""
+
+import pandas as pd
+import numpy as np
+from numpy import array
+#from sklearn.model_selection import train_test_split
+from sklearn.svm import NuSVC
+#from sklearn.metrics import classification_report, confusion_matrix
+#from sklearn.metrics import accuracy_score
+#from sklearn.model_selection import cross_validate
+from sklearn.model_selection import cross_val_score, cross_val_predict
+#from sklearn import metrics
+#from sklearn.model_selection import KFold
+from sklearn.model_selection import StratifiedKFold
+#from sklearn import svm
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
+seed = 8
+np.random.seed(seed)
+#"th" format means that the convolutional kernels will have the shape(depth, input_depth, rows, cols)
+#K.set_image_dim_ordering('th')
+data = pd.read_csv("CN&pMCI_input_f.csv", header=None)
+#to drop first row and first column
+data.drop(data.columns[[0]], axis=1, inplace=True)
+data.drop(data.head(1).index, inplace=True)
+#create data frame into numpy array
+dataset=data.as_matrix()
+print(dataset.shape)
+X = dataset [:, :]
+
+data = pd.read_csv("CN&pMCI_output_f.csv", header=None)
+#to drop first row and first column
+#create data frame into numpy array
+dataset=data.as_matrix()
+print(dataset.shape)
+Y = dataset[:]
+#print(Y)
+#print(data.head())
+#X = dataset1
+#Y = dataset2
+X=np.array(X)
+import pywt
+import dtcwt
+transform = dtcwt.Transform2d()
+transform_data=[]
+for row in X:
+    twoD_image=np.reshape(row,(91,109))
+    X_t=transform.forward(twoD_image,nlevels=2)
+    y1,yh=dtcwt.utils.unpack(X_t,backend='numpy')
+    print(y1.shape)
+    y1=np.reshape(y1,(1,2576))
+    transform_data.append(y1)
+print(y1.shape)
+transform_data=array(transform_data)
+print(transform_data.shape)
+transform_data=np.reshape(transform_data,(351,2576))
+print(transform_data.shape)
+X=pd.DataFrame.from_records(transform_data)
+
+#print(y.shape)
+
+
+#(X,coeff) =pywt.dwt(X,'sym5')
+#print (X.shape)
+#X = X.reshape(X.shape[0], 1, 91, 109).astype('float32')
+
+Y=np.array(Y)
+#print(Y.shape)
+# this is done so that i can use categorical_crossentropy loss function
+#Y= np_utils.to_categorical(Y)
+#Y=np.reshape(Y,(60,1))
+#print(X.shape)
+print(Y.shape)
+X=X/255
+
+
+#kf = KFold(n_splits=2) # Define the split - into 2 folds
+#kf.get_n_splits(X) # returns the number of splitting iterations inthe cross-validator
+#print(kf)
+#KFold(n_splits=10, random_state=seed, shuffle=False)
+kf = StratifiedKFold(n_splits=10, shuffle=True, random_state=seed)
+#kf = KFold(10, n_folds = 5, shuffle=True)
+#svm_class = SVC(kernel='linear')
+#svm_class = SVC(kernel='poly', degree=8)
+#svm_class = NuSVC(kernel='rbf')
+#svm_class = SVC(kernel='sigmoid')
+#svm_class = svm.LinearSVC()
+#model = svclassifier.fit(X_train, Y_train)
+#y_pred = svclassifier.predict(X_test)
+
+#rf_class = RandomForestClassifier(n_estimators=10)
+#rf_class = RandomForestClassifier(n_estimators=1000, random_state=0,max_features = 'auto')
+gbm_class = GradientBoostingClassifier(n_estimators=1000,
+random_state=0, max_features = 'auto')
+
+a = cross_val_score(gbm_class, X, Y, scoring='accuracy', cv = kf)
+sum = 0
+
+for k in a:
+    sum = sum + k
+
+avg = 100 * (sum/10)
+
+print(a)
+print(avg)
+
+#print(cross_val_score(rf_class, X, Y, scoring='accuracy', cv = kf))
+
+#X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size = 0.2)
+
+#svclassifier = SVC(kernel='poly', degree=8)
+#3svclassifier = SVC(kernel='rbf')
+#svclassifier = SVC(kernel='sigmoid')
+#model = svclassifier.fit(X_train, y_train)
+#y_pred = svclassifier.predict(X_test)
+#print(confusion_matrix(y_test,y_pred))
+#print(classification_report(y_test,y_pred))
+#print(accuracy_score(y_test, y_pred))
