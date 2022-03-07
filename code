@@ -20,22 +20,19 @@ from sklearn.model_selection import StratifiedKFold
 #from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
-seed = 8
-np.random.seed(seed)
-#"th" format means that the convolutional kernels will have the shape(depth, input_depth, rows, cols)
-#K.set_image_dim_ordering('th')
+
+
 data = pd.read_csv("CN&pMCI_input_f.csv", header=None)
-#to drop first row and first column
+
 data.drop(data.columns[[0]], axis=1, inplace=True)
 data.drop(data.head(1).index, inplace=True)
-#create data frame into numpy array
+
 dataset=data.as_matrix()
 print(dataset.shape)
 X = dataset [:, :]
 
 data = pd.read_csv("CN&pMCI_output_f.csv", header=None)
-#to drop first row and first column
-#create data frame into numpy array
+
 dataset=data.as_matrix()
 print(dataset.shape)
 Y = dataset[:]
@@ -62,27 +59,13 @@ transform_data=np.reshape(transform_data,(351,2576))
 print(transform_data.shape)
 X=pd.DataFrame.from_records(transform_data)
 
-#print(y.shape)
-
-
-#(X,coeff) =pywt.dwt(X,'sym5')
-#print (X.shape)
-#X = X.reshape(X.shape[0], 1, 91, 109).astype('float32')
-
 Y=np.array(Y)
-#print(Y.shape)
-# this is done so that i can use categorical_crossentropy loss function
-#Y= np_utils.to_categorical(Y)
-#Y=np.reshape(Y,(60,1))
-#print(X.shape)
+
 print(Y.shape)
 X=X/255
 
 
-#kf = KFold(n_splits=2) # Define the split - into 2 folds
-#kf.get_n_splits(X) # returns the number of splitting iterations inthe cross-validator
-#print(kf)
-#KFold(n_splits=10, random_state=seed, shuffle=False)
+
 kf = StratifiedKFold(n_splits=10, shuffle=True, random_state=seed)
 #kf = KFold(10, n_folds = 5, shuffle=True)
 #svm_class = SVC(kernel='linear')
